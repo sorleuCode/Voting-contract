@@ -1,0 +1,52 @@
+const { ethers } = require("hardhat");
+
+async function main() {
+
+    const VotingSystem = await ethers.getContractFactory("VotingSystem");
+    const candidateNames = ["Alice", "Bob", "Charlie"];
+    const candidateParties = ["PartyA", "PartyB", "PartyC"];
+    const electionDuration = 1;
+
+
+    // starting script
+
+
+    console.log("######## starting scripting #####")
+    
+
+    console.log(" ### Deploying VotingSystem ####");
+    const votingSystem = await VotingSystem.deploy(candidateNames, candidateParties, electionDuration);
+    await votingSystem.deployed();
+    console.log(`VotingSystem deployed to: ${votingSystem.address}`);
+
+
+
+
+    // Cast votes
+    const [owner, voter1, voter2] = await ethers.getSigners();
+    console.log(" #### Casting votes #####");
+    await votingSystem.connect(voter1).vote(0); 
+    console.log(`Voter1 voted for candidate index 0`);
+
+    await votingSystem.connect(voter2).vote(1);
+    console.log(`Voter2 voted for candidate index 1`);
+
+    // Fast-forward time to end the election
+    console.log(" ### Fast-forwarding time to end the election ####");
+    await ethers.provider.send("evm_increaseTime", [electionDuration * 60 * 60]); 
+    await ethers.provider.send("evm_mine"); 
+
+    // Retrieve the winner
+    console.log(" ###### Retrieving winner details #####");
+    const winnerDetails = await votingSystem.getWinnerDetails();
+    console.log(`Winner: ${winnerDetails.name}`);
+    console.log(`Party: ${winnerDetails.party}`);
+    console.log(`Vote Count: ${winnerDetails.voteCount}`);
+}
+
+main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error);
+        process.exit(1);
+    });
