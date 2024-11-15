@@ -8,9 +8,6 @@ import {
 
 describe("VotingSystem", function () {
 
-    const candidateNames = ["Alice", "Bob", "Charlie"];
-    const candidateParties = ["PartyA", "PartyB", "PartyC"];
-    const electionDuration = 1;
 
 
 
@@ -32,7 +29,9 @@ describe("VotingSystem", function () {
 
     it("should initialize with correct candidates", async function () {
 
-        const {votingSystem} =  await loadFixture(deployVotingContractsFixture);
+        const {votingSystem, candidateNames, candidateParties, electionDuration,  owner, voter1, voter2,} =  await loadFixture(deployVotingContractsFixture);
+
+
         for (let i = 0; i < candidateNames.length; i++) {
             const candidate = await votingSystem.candidates(i);
             expect(candidate.name).to.equal(candidateNames[i]);
@@ -56,7 +55,7 @@ describe("VotingSystem", function () {
     it("should prevent double voting by the same user", async function () {
         const {votingSystem, candidateNames, candidateParties, electionDuration,  owner, voter1, voter2,} =  await loadFixture(deployVotingContractsFixture);
 
-        await votingSystem.connect(voter1).vote(1); // Voter1 votes for Bob
+        await votingSystem.connect(voter1).vote(1); 
         await expect(votingSystem.connect(voter1).vote(1)).to.be.revertedWith("You have already voted.");
     });
 
